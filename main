@@ -1,0 +1,39 @@
+import urllib.request
+import re
+
+keywd = 'iphone8'
+keywd = urllib.request.quote(keywd)
+pat = '"pic_url":"//(.*?)"'
+pat2 = 'nid":"(.*?)"'
+pat3 = '"rateContent":"(.*?)"'
+for i in range(0,2):
+    path = 'https://s.taobao.com/search?initiative_id=tbindexz_20170306&ie=utf8&spm=a21bo.2017.201856-taobao-item.2&sourceId=tb.index&search_type=item&ssid=s5-e&commend=all&imgfile=&q='+keywd+'&suggest=history_1&_input_charset=utf-8&wq=&suggest_query=&source=suggest&bcoffset=4&ntoffset=4&p4ppushleft=1%2C48&s='+str(44*i)
+    data = urllib.request.urlopen(path).read().decode('utf-8')
+    photolist = re.compile(pat).findall(data)
+    idlist = re.compile(pat2).findall(data)
+    print(idlist)
+    for j in range(0,len(photolist)):
+        try:
+            thisphoto = photolist[j]
+            thisid = idlist[j]
+            dataurl = 'https://rate.tmall.com/list_detail_rate.htm?itemId='+str(thisid)+'&sellerId=196993935&currentPage=1&append=0&content=1&tagId=&posi=&picture=&needFold=0'
+            dataurl2 = 'https://rate.taobao.com/feedRateList.htm?auctionNumId='+str(thisid)+'&currentPageNum=1&pageSize=20&rateType=&orderType=sort_weight&attribute=&sku=&hasSku=false&folded=0&&callback=jsonp_tbcrate_reviews_list'
+            dataopen = urllib.request.urlopen(dataurl).read().decode('gbk','ignore')
+            dataopen2 = urllib.request.urlopen(dataurl2).read().decode('gbk','ignore')
+            print(dataopen)
+            redata = re.compile(pat3).findall(dataopen)
+            redata2 = re.compile(pat3).findall(dataopen2)
+            thisurl = 'http://'+thisphoto
+            file = 'E:/python/html/tb/'+str(i)+str(j)+'.jpg'
+            file2 = 'E:/python/html/tb/'+str(i)+str(j)+'.txt'
+            urllib.request.urlretrieve(thisurl,file)
+            print(redata)
+            fp = open(file2,'w')
+            for k in range(0,len(redata)):
+                thisdata = redata[k] + '\n'
+                fp.write(thisdata)
+            for k in range(0,len(redata2)):
+                thisdata = redata2[k] + '\n'
+                fp.write(thisdata)
+        except Exception as e:
+            print(e)
